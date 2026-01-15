@@ -160,8 +160,8 @@ const App: React.FC = () => {
                 {/* Panel 2 */}
                 <div className="relative w-11/12 aspect-video bg-slate-800 rounded-md border border-white/20 shadow-lg transform translate-x-4">
                   <img 
-                    src="https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?auto=format&fit=crop&q=80&w=400" 
-                    alt="Chia seed spoon 2" 
+                    src="/Bitxia.png"
+                    alt="Eroglifikoa"
                     className="w-full h-full object-cover rounded-md opacity-90"
                   />
                   <div className="absolute inset-0 border border-white/10 rounded-md"></div>
