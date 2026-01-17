@@ -1,7 +1,7 @@
 
 import { GameEntry } from './types';
 
-export const GAME_WORDS: GameEntry[] = [
+export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "HAIZPEA", egoera: "ondo dago" },
   { text: "HALTEROFILIA", egoera: "ondo dago" },
   { text: "HIEROGLIFIKOA", egoera: "ondo dago" },
@@ -13,6 +13,20 @@ export const GAME_WORDS: GameEntry[] = [
   { text: "HOMOPLATOA", egoera: "gaizki dago" },
   { text: "HARMAILA", egoera: "ondo dago" },
   { text: "HELIZEA", egoera: "ondo dago" }
+];
+
+export const GAME_WORDS_LVL2: GameEntry[] = [
+  { text: "HIERARKIA", egoera: "ondo dago" },
+  { text: "HAUTSA", egoera: "ondo dago" },
+  { text: "ZIHUR", egoera: "gaizki dago" },
+  { text: "HUMOREA", egoera: "ondo dago" },
+  { text: "HERESERKIA", egoera: "gaizki dago" },
+  { text: "UHINA", egoera: "ondo dago" },
+  { text: "HAUTSI", egoera: "ondo dago" },
+  { text: "ZEHAR", egoera: "ondo dago" },
+  { text: "LEIHOA", egoera: "ondo dago" },
+  { text: "HIBERNATU", egoera: "ondo dago" },
+  { text: "HESTEA", egoera: "ondo dago" }
 ];
 
 export const ATSOITZAK: GameEntry[] = [
@@ -37,6 +51,7 @@ export const UI_STRINGS = {
   hieroglyphsSubtitle: "Asmatu eroglifikoaren esanahia.",
   playAgain: "BERRIRO HASI",
   backMenu: "MENURA ITZULI",
+  nextLevel: "HURRENGO ZERRENDA",
   correctCount: "Ondo:",
   wrongCount: "Gaizki:",
   score: "Puntuazioa",
@@ -45,5 +60,6 @@ export const UI_STRINGS = {
   modeHieroglyphs: "Eroglifikoak",
   solution: "EMAITZA IKUSI",
   hiddenSolution: "Ezkutuko emaitza:",
-  timerPrefix: "Itxaron segundo batzuk: "
+  timerPrefix: "Itxaron segundo batzuk: ",
+  dictionary: "Hiztegia"
 };
