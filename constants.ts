@@ -29,7 +29,7 @@ export const GAME_WORDS_LVL2: GameEntry[] = [
   { text: "HESTEA", egoera: "ondo dago" }
 ];
 
-export const ATSOITZAK: GameEntry[] = [
+export const ATSOTITZAK: GameEntry[] = [
   { text: "AZAROA BERO, NEGUA GERO", egoera: "ondo dago" },
   { text: "APIRILAK BELAR, GAUAK NEGAR", egoera: "gaizki dago" },
   { text: "GOIZ GORRI, ARRATS EURI", egoera: "ondo dago" },
@@ -45,7 +45,7 @@ export const ATSOITZAK: GameEntry[] = [
 
 export const HIEROGLYPHS: HieroglyphEntry[] = [
   {
-    imageUrl: "ero_00001.png",
+    imageUrl: "https://file.house/UfM8.png",
     imageText: "Zure anaia da",
     solution: "BITXIA",
     explanation: "(Bi + Chia)"
@@ -62,7 +62,7 @@ export const UI_STRINGS = {
   title: "Zuzen idatzita daude",
   menuSubtitle: "Aukeratu joko modu bat zure euskara maila neurtzeko.",
   wordsSubtitle: "Sakatu hitzak ondo ala gaizki idatzita dauden jakiteko.",
-  proverbsSubtitle: "Sakatu atsoitzak ondo ala gaizki idatzita dauden jakiteko.",
+  proverbsSubtitle: "Sakatu atsotitzak ondo ala gaizki idatzita dauden jakiteko.",
   hieroglyphsSubtitle: "Asmatu eroglifikoaren esanahia.",
   playAgain: "BERRIRO HASI",
   backMenu: "MENURA ITZULI",
@@ -72,10 +72,14 @@ export const UI_STRINGS = {
   wrongCount: "Gaizki:",
   score: "Puntuazioa",
   modeWords: "Zuzen idatzita",
-  modeProverbs: "Atsoitzak",
+  modeProverbs: "Atsotitzak",
   modeHieroglyphs: "Eroglifikoak",
   solution: "EMAITZA IKUSI",
   hiddenSolution: "Ezkutuko emaitza:",
   timerPrefix: "Itxaron segundo batzuk: ",
-  dictionary: "Hiztegia"
+  dictionary: "Hiztegia",
+  guessPlaceholder: "Idatzi zure erantzuna...",
+  checkButton: "Egiaztatu",
+  correctFeedback: "Biba zu! Asmatu duzu!",
+  wrongFeedback: "Ez da hori... Saiatu berriro!"
 };

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GAME_WORDS_LVL1, GAME_WORDS_LVL2, ATSOITZAK, HIEROGLYPHS, UI_STRINGS } from './constants';
+import { GAME_WORDS_LVL1, GAME_WORDS_LVL2, ATSOTITZAK, HIEROGLYPHS, UI_STRINGS } from './constants';
 import { WordItem } from './components/WordItem';
 import { AppView, GameMode, GameEntry, HieroglyphEntry } from './types';
 
@@ -14,6 +14,8 @@ const App: React.FC = () => {
   // Hieroglyph specific state
   const [timer, setTimer] = useState(20);
   const [showHieroglyphSolution, setShowHieroglyphSolution] = useState(false);
+  const [userGuess, setUserGuess] = useState("");
+  const [guessFeedback, setGuessFeedback] = useState<"correct" | "wrong" | null>(null);
   const timerRef = useRef<number | null>(null);
 
   // Determine current data based on mode and level
@@ -21,7 +23,7 @@ const App: React.FC = () => {
   if (mode === 'words') {
     currentData = level === 1 ? GAME_WORDS_LVL1 : GAME_WORDS_LVL2;
   } else if (mode === 'proverbs') {
-    currentData = ATSOITZAK;
+    currentData = ATSOTITZAK;
   }
 
   const currentHiero: HieroglyphEntry = HIEROGLYPHS[hieroLevel] || HIEROGLYPHS[0];
@@ -30,6 +32,8 @@ const App: React.FC = () => {
     if (view === 'game' && mode === 'hieroglyphs') {
       setTimer(20);
       setShowHieroglyphSolution(false);
+      setUserGuess("");
+      setGuessFeedback(null);
       if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = window.setInterval(() => {
         setTimer((prev) => {
@@ -50,6 +54,22 @@ const App: React.FC = () => {
     const newRevealed = new Set(revealedIndexes);
     newRevealed.add(index);
     setRevealedIndexes(newRevealed);
+  };
+
+  const handleGuessCheck = () => {
+    if (userGuess.trim().toUpperCase() === currentHiero.solution.toUpperCase()) {
+      setGuessFeedback("correct");
+      setShowHieroglyphSolution(true);
+    } else {
+      setGuessFeedback("wrong");
+      setTimeout(() => setGuessFeedback(null), 2000);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && timer === 0 && !showHieroglyphSolution) {
+      handleGuessCheck();
+    }
   };
 
   const startGame = (gameMode: GameMode) => {
@@ -76,6 +96,8 @@ const App: React.FC = () => {
     setLevel(1);
     setHieroLevel(0);
     setShowHieroglyphSolution(false);
+    setUserGuess("");
+    setGuessFeedback(null);
   };
 
   const renderMenu = () => (
@@ -169,15 +191,53 @@ const App: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-6">
-                  <button
-                    onClick={() => setShowHieroglyphSolution(true)}
-                    className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-2xl transition-all shadow-xl hover:shadow-blue-500/20 text-xl tracking-widest game-title animate-in zoom-in"
-                  >
-                    {UI_STRINGS.solution}
-                  </button>
+                  {!showHieroglyphSolution && (
+                    <div className="w-full space-y-4 animate-in fade-in slide-in-from-top-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={userGuess}
+                          onChange={(e) => setUserGuess(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          placeholder={UI_STRINGS.guessPlaceholder}
+                          className={`w-full bg-slate-800 border-2 rounded-xl py-4 px-6 text-xl focus:outline-none transition-all ${
+                            guessFeedback === 'wrong' ? 'border-red-500 animate-shake' : 'border-slate-700 focus:border-blue-500'
+                          }`}
+                          autoFocus
+                        />
+                        {guessFeedback === 'wrong' && (
+                          <p className="absolute -bottom-6 left-0 text-red-400 text-xs font-bold uppercase tracking-wider">
+                            {UI_STRINGS.wrongFeedback}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <button
+                          onClick={handleGuessCheck}
+                          className="flex-grow py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-xl transition-all shadow-xl hover:shadow-blue-500/20 text-lg tracking-widest game-title"
+                        >
+                          {UI_STRINGS.checkButton}
+                        </button>
+                        <button
+                          onClick={() => setShowHieroglyphSolution(true)}
+                          className="px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-bold rounded-xl transition-all border border-slate-700"
+                          title={UI_STRINGS.solution}
+                        >
+                          <i className="fa-solid fa-eye"></i>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {showHieroglyphSolution && (
                     <div className="w-full flex flex-col items-center">
                       <div className="w-full p-8 bg-green-950/40 border-2 border-green-500/50 rounded-2xl text-center animate-in fade-in slide-in-from-bottom-4 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+                        {guessFeedback === 'correct' && (
+                          <p className="text-green-400 font-bold mb-4 flex items-center justify-center gap-2">
+                            <i className="fa-solid fa-trophy"></i> {UI_STRINGS.correctFeedback}
+                          </p>
+                        )}
                         <p className="text-xs uppercase font-black text-green-400 mb-3 tracking-[0.4em]">{UI_STRINGS.hiddenSolution}</p>
                         <p className="text-5xl font-black text-white tracking-[0.2em] game-title drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] uppercase">{currentHiero.solution}</p>
                         {currentHiero.explanation && (
