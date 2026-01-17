@@ -45,7 +45,7 @@ export const ATSOTITZAK: GameEntry[] = [
 
 export const HIEROGLYPHS: HieroglyphEntry[] = [
   {
-    imageUrl: "https://file.house/UfM8.png",
+    imageUrl: "ero_00001.png",
     imageText: "Zure anaia da",
     solution: "BITXIA",
     explanation: "(Bi + Chia)"
