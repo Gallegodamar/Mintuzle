@@ -13,5 +13,10 @@ export interface HieroglyphEntry {
   explanation: string;
 }
 
-export type GameMode = 'words' | 'proverbs' | 'hieroglyphs';
+export interface SynonymEntry {
+  hitz: string;
+  sinonimoak: string[];
+}
+
+export type GameMode = 'words' | 'proverbs' | 'hieroglyphs' | 'synonyms' | 'daily';
 export type AppView = 'menu' | 'game';

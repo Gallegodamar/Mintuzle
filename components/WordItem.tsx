@@ -34,16 +34,13 @@ export const WordItem: React.FC<WordItemProps> = ({
           }
         `}
       >
-        <span className={`text-xl font-bold tracking-wider game-title text-center md:text-left mb-2 md:mb-0`}>
+        <span className={`text-xl font-bold tracking-tight game-title text-center md:text-left mb-2 md:mb-0`}>
           {text}
         </span>
 
         <div className="flex items-center gap-3">
           {isRevealed && (
             <div className="flex items-center gap-2">
-              <span className="text-[10px] md:text-xs uppercase font-black bg-black/10 px-2 py-1 rounded">
-                {actualStatus}
-              </span>
               {isCorrect ? (
                 <i className="fa-solid fa-circle-check text-2xl"></i>
               ) : (
@@ -67,7 +64,7 @@ export const WordItem: React.FC<WordItemProps> = ({
         >
           <div className="flex flex-col items-center">
             <i className="fa-solid fa-book-open text-blue-600 group-hover/dict:scale-110 transition-transform"></i>
-            <span className="text-[8px] uppercase mt-1 text-slate-400 font-black group-hover/dict:text-blue-600">Hiztegia</span>
+            <span className="text-[8px] mt-1 text-slate-400 font-black group-hover/dict:text-blue-600">Hiztegia</span>
           </div>
         </a>
       )}
