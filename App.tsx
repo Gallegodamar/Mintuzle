@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GAME_WORDS_LVL1, GAME_WORDS_LVL2, ATSOITZAK, UI_STRINGS } from './constants';
+import { GAME_WORDS_LVL1, GAME_WORDS_LVL2, ATSOITZAK, HIEROGLYPHS, UI_STRINGS } from './constants';
 import { WordItem } from './components/WordItem';
-import { AppView, GameMode, GameEntry } from './types';
+import { AppView, GameMode, GameEntry, HieroglyphEntry } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('menu');
   const [mode, setMode] = useState<GameMode>('words');
   const [level, setLevel] = useState<number>(1);
+  const [hieroLevel, setHieroLevel] = useState<number>(0);
   const [revealedIndexes, setRevealedIndexes] = useState<Set<number>>(new Set());
   
   // Hieroglyph specific state
@@ -23,7 +24,7 @@ const App: React.FC = () => {
     currentData = ATSOITZAK;
   }
 
-  const hieroglyphImageUrl = "/Bitxia.png";
+  const currentHiero: HieroglyphEntry = HIEROGLYPHS[hieroLevel] || HIEROGLYPHS[0];
 
   useEffect(() => {
     if (view === 'game' && mode === 'hieroglyphs') {
@@ -43,7 +44,7 @@ const App: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [view, mode]);
+  }, [view, mode, hieroLevel]);
 
   const handleReveal = (index: number) => {
     const newRevealed = new Set(revealedIndexes);
@@ -55,6 +56,7 @@ const App: React.FC = () => {
     setMode(gameMode);
     setView('game');
     setLevel(1);
+    setHieroLevel(0);
     setRevealedIndexes(new Set());
   };
 
@@ -63,10 +65,16 @@ const App: React.FC = () => {
     setRevealedIndexes(new Set());
   };
 
+  const nextHieroglyph = () => {
+    setHieroLevel((prev) => prev + 1);
+    setRevealedIndexes(new Set());
+  };
+
   const resetGame = () => {
     setView('menu');
     setRevealedIndexes(new Set());
     setLevel(1);
+    setHieroLevel(0);
     setShowHieroglyphSolution(false);
   };
 
@@ -131,7 +139,7 @@ const App: React.FC = () => {
           
           <div className="text-right">
             <h2 className="text-xl font-black text-blue-400 tracking-tight uppercase game-title">
-              {mode === 'words' ? `${UI_STRINGS.modeWords} (${level}/2)` : mode === 'proverbs' ? UI_STRINGS.modeProverbs : UI_STRINGS.modeHieroglyphs}
+              {mode === 'words' ? `${UI_STRINGS.modeWords} (${level}/2)` : mode === 'proverbs' ? UI_STRINGS.modeProverbs : `${UI_STRINGS.modeHieroglyphs} (${hieroLevel + 1}/${HIEROGLYPHS.length})`}
             </h2>
           </div>
         </div>
@@ -140,13 +148,13 @@ const App: React.FC = () => {
           <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
             <div className="relative group overflow-hidden rounded-3xl border-4 border-slate-800 bg-slate-900 p-2 w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
               <img 
-                src={hieroglyphImageUrl} 
+                src={currentHiero.imageUrl} 
                 alt="Hieroglyph" 
-                className="w-full h-auto rounded-2xl shadow-inner"
+                className="w-full h-auto rounded-2xl shadow-inner min-h-[200px] object-contain bg-slate-800"
               />
               <div className="absolute bottom-4 left-0 right-0 text-center">
-                <h3 className="text-3xl font-black text-white italic drop-shadow-[0_2px_10px_rgba(0,0,0,1)] tracking-widest uppercase">
-                   "Zure anaia da"
+                <h3 className="text-2xl md:text-3xl font-black text-white italic drop-shadow-[0_2px_10px_rgba(0,0,0,1)] tracking-widest uppercase px-2">
+                   "{currentHiero.imageText}"
                 </h3>
               </div>
             </div>
@@ -168,10 +176,32 @@ const App: React.FC = () => {
                     {UI_STRINGS.solution}
                   </button>
                   {showHieroglyphSolution && (
-                    <div className="w-full mt-4 p-8 bg-green-950/40 border-2 border-green-500/50 rounded-2xl text-center animate-in fade-in slide-in-from-bottom-4 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-                      <p className="text-xs uppercase font-black text-green-400 mb-3 tracking-[0.4em]">{UI_STRINGS.hiddenSolution}</p>
-                      <p className="text-5xl font-black text-white tracking-[0.2em] game-title drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">BITXIA</p>
-                      <p className="mt-4 text-xs text-green-300/60 font-medium italic">(Bi + Chia)</p>
+                    <div className="w-full flex flex-col items-center">
+                      <div className="w-full p-8 bg-green-950/40 border-2 border-green-500/50 rounded-2xl text-center animate-in fade-in slide-in-from-bottom-4 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+                        <p className="text-xs uppercase font-black text-green-400 mb-3 tracking-[0.4em]">{UI_STRINGS.hiddenSolution}</p>
+                        <p className="text-5xl font-black text-white tracking-[0.2em] game-title drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] uppercase">{currentHiero.solution}</p>
+                        {currentHiero.explanation && (
+                          <p className="mt-4 text-xs text-green-300/60 font-medium italic">{currentHiero.explanation}</p>
+                        )}
+                      </div>
+                      
+                      {hieroLevel < HIEROGLYPHS.length - 1 && (
+                        <button
+                          onClick={nextHieroglyph}
+                          className="mt-8 px-10 py-4 bg-white text-slate-950 font-black rounded-2xl hover:bg-blue-400 transition-all tracking-widest uppercase text-sm game-title animate-bounce"
+                        >
+                          {UI_STRINGS.nextHiero}
+                        </button>
+                      )}
+                      
+                      {hieroLevel === HIEROGLYPHS.length - 1 && (
+                        <button
+                          onClick={resetGame}
+                          className="mt-8 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl transition-all tracking-widest uppercase text-sm game-title"
+                        >
+                          {UI_STRINGS.backMenu}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

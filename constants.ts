@@ -1,5 +1,5 @@
 
-import { GameEntry } from './types';
+import { GameEntry, HieroglyphEntry } from './types';
 
 export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "HAIZPEA", egoera: "ondo dago" },
@@ -43,6 +43,21 @@ export const ATSOITZAK: GameEntry[] = [
   { text: "EKAINA EDER, UDA HALABER", egoera: "ondo dago" }
 ];
 
+export const HIEROGLYPHS: HieroglyphEntry[] = [
+  {
+    imageUrl: "ero_00001.png",
+    imageText: "Zure anaia da",
+    solution: "BITXIA",
+    explanation: "(Bi + Chia)"
+  },
+  {
+    imageUrl: "ero_00002.png",
+    imageText: "Film horretan agertzen da",
+    solution: "APATXE",
+    explanation: ""
+  }
+];
+
 export const UI_STRINGS = {
   title: "Zuzen idatzita daude",
   menuSubtitle: "Aukeratu joko modu bat zure euskara maila neurtzeko.",
@@ -52,6 +67,7 @@ export const UI_STRINGS = {
   playAgain: "BERRIRO HASI",
   backMenu: "MENURA ITZULI",
   nextLevel: "HURRENGO ZERRENDA",
+  nextHiero: "HURRENGO EROGLIFIKOA",
   correctCount: "Ondo:",
   wrongCount: "Gaizki:",
   score: "Puntuazioa",
