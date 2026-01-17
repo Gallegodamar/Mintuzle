@@ -59,7 +59,7 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
 ];
 
 export const UI_STRINGS = {
-  title: "Zuzen idatzita daude",
+  title: "Begiluze",
   menuSubtitle: "Aukeratu joko modu bat zure euskara maila neurtzeko.",
   wordsSubtitle: "Sakatu hitzak ondo ala gaizki idatzita dauden jakiteko.",
   proverbsSubtitle: "Sakatu atsotitzak ondo ala gaizki idatzita dauden jakiteko.",
