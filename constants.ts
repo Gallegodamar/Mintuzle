@@ -48,12 +48,36 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
     imageUrl: "ero_00001.png",
     imageText: "Zure anaia da",
     solution: "BITXIA",
-    explanation: "(Bi + Chia)"
+    explanation: ""
   },
   {
     imageUrl: "ero_00002.png",
     imageText: "Film horretan agertzen da",
     solution: "APATXE",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00003.png",
+    imageText: "Ez dakigu nolakoa den",
+    solution: "UNIBERTSOA",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00004.png",
+    imageText: "Fresko dago",
+    solution: "POMELOA",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00005.png",
+    imageText: "Arratsalde ederra igaro dugu",
+    solution: "BARRAKETAN",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00006.png",
+    imageText: "Jolas gaitezen",
+    solution: "BELARRETAN",
     explanation: ""
   }
 ];
@@ -68,15 +92,17 @@ export const UI_STRINGS = {
   backMenu: "MENURA ITZULI",
   nextLevel: "HURRENGO ZERRENDA",
   nextHiero: "HURRENGO EROGLIFIKOA",
-  correctCount: "Ondo:",
-  wrongCount: "Gaizki:",
+  correctCount: "Asmatuta:",
+  wrongCount: "Huts egin da:",
+  remainingCount: "Geratzen dira:",
   score: "Puntuazioa",
   modeWords: "Zuzen idatzita",
   modeProverbs: "Atsotitzak",
   modeHieroglyphs: "Eroglifikoak",
   solution: "EMAITZA IKUSI",
   hiddenSolution: "Ezkutuko emaitza:",
-  timerPrefix: "Itxaron segundo batzuk: ",
+  timerPrefix: "Denbora amaitu baino lehen idatzi: ",
+  timerExpired: "Denbora amaitu da!",
   dictionary: "Hiztegia",
   guessPlaceholder: "Idatzi zure erantzuna...",
   checkButton: "Egiaztatu",
