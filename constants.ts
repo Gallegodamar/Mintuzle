@@ -95,37 +95,37 @@ export const SINONIMOAK: SynonymEntry[] = [
 
 export const HIEROGLYPHS: HieroglyphEntry[] = [
   {
-    imageUrl: "ero_00001.png",
+    imageUrl: "ero_00001.webp",
     imageText: "Zure anaia da",
     solution: "Bitxia",
     explanation: ""
   },
   {
-    imageUrl: "ero_00002.png",
+    imageUrl: "ero_00002.webp",
     imageText: "Film horretan agertzen da",
     solution: "Apatxea",
     explanation: ""
   },
   {
-    imageUrl: "ero_00003.png",
+    imageUrl: "ero_00003.webp",
     imageText: "Ez dakigu nolakoa den",
     solution: "Unibertsoa",
     explanation: ""
   },
   {
-    imageUrl: "ero_00004.png",
+    imageUrl: "ero_00004.webp",
     imageText: "Fresko dago",
     solution: "Pomeloa",
     explanation: ""
   },
   {
-    imageUrl: "ero_00005.png",
+    imageUrl: "ero_00005.webp",
     imageText: "Arratsalde ederra igaro dugu",
     solution: "Barraketan",
     explanation: ""
   },
   {
-    imageUrl: "ero_00006.png",
+    imageUrl: "ero_00006.webp",
     imageText: "Jolas gaitezen",
     solution: "Belarretan",
     explanation: ""
