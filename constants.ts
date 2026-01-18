@@ -129,6 +129,30 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
     imageText: "Jolas gaitezen",
     solution: "Belarretan",
     explanation: ""
+  },
+  {
+    imageUrl: "ero_00007.webp",
+    imageText: "Santiago bidean ikusi nituen",
+    solution: "Bi pelegin",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00008.webp",
+    imageText: "Ihesi egiten harrapatu du",
+    solution: "Guardiak",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00009.webp",
+    imageText: "Gure herrian eraiki dute",
+    solution: "Ospitalea",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00010.webp",
+    imageText: "Izoztu da belardian",
+    solution: "Ihintza",
+    explanation: ""
   }
 ];
 
