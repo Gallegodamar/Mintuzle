@@ -12,7 +12,7 @@ export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "Hozbera", egoera: "ondo dago" },
   { text: "Homoplatoa", egoera: "gaizki dago" },
   { text: "Harmaila", egoera: "ondo dago" },
-  { text: "Helizea", egoera: "ondo dago" }
+  { text: "Helizea", egoera: "ondo dago" },
   { text: "Erramintak", egoera: "gaizki dago" }
   
 ];
