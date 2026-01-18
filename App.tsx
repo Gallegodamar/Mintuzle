@@ -190,6 +190,14 @@ const App: React.FC = () => {
     }
   }, [getActiveMode, currentItem, userGuess, showSolution]);
 
+  const handleResolveChallenge = useCallback(() => {
+    if (showSolution) return;
+    setFailedCount(f => f + 1);
+    setShowSolution(true);
+    setGuessFeedback("wrong");
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, [showSolution]);
+
   const handleSpellingChoice = useCallback((choice: WordStatus) => {
     if (showSolution) return;
     const item = currentItem as GameEntry;
@@ -390,7 +398,7 @@ const App: React.FC = () => {
                     {activeMode === 'hieroglyphs' && !showSolution && (
                       <div className="flex flex-col items-center gap-4 md:gap-6">
                          <div className={`text-4xl md:text-5xl font-black tabular-nums transition-colors ${timer <= 10 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>{timer}</div>
-                         <div className="w-full relative">
+                         <div className="w-full">
                             <input 
                               type="text" 
                               value={userGuess} 
@@ -400,7 +408,10 @@ const App: React.FC = () => {
                               className={`w-full bg-slate-50 border-2 rounded-xl py-3 md:py-4 px-6 text-lg md:text-xl focus:outline-none transition-all ${guessFeedback === 'wrong' ? 'border-red-500 animate-shake' : 'border-slate-200 focus:border-blue-500'}`} 
                               autoFocus 
                             />
-                            <button onClick={handleGuessCheck} className="w-full mt-4 py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg hover:bg-blue-700 transition-all game-title active:scale-95">{UI_STRINGS.checkButton}</button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                              <button onClick={handleGuessCheck} className="py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg hover:bg-blue-700 transition-all game-title active:scale-95">{UI_STRINGS.checkButton}</button>
+                              <button onClick={handleResolveChallenge} className="py-3 md:py-4 bg-white border-2 border-slate-200 text-slate-600 font-black rounded-xl shadow-sm hover:bg-slate-50 transition-all game-title active:scale-95">{UI_STRINGS.solution}</button>
+                            </div>
                          </div>
                       </div>
                     )}
