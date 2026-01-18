@@ -12,9 +12,8 @@ export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "Hozbera", egoera: "ondo dago" },
   { text: "Homoplatoa", egoera: "gaizki dago" },
   { text: "Harmaila", egoera: "ondo dago" },
-  { text: "Helizea", egoera: "ondo dago" },
-  { text: "Erramintak", egoera: "gaizki dago" },
-  { text: "aurrerapauso", egoera: "ondo dago" },
+  { text: "Helizea", egoera: "ondo dago" }
+  { text: "Erramintak", egoera: "gaizki dago" }
   
 ];
 
@@ -155,6 +154,30 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
     imageUrl: "ero_00010.webp",
     imageText: "Izoztu da belardian",
     solution: "Ihintza",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00011.webp",
+    imageText: "Oso gaziak daude",
+    solution: "Krispetak",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00012.webp",
+    imageText: "Hegan joan da",
+    solution: "Pelikanoa",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00013.webp",
+    imageText: "Zakarrontzira bota dugu",
+    solution: "Soberakina",
+    explanation: ""
+  },
+  {
+    imageUrl: "ero_00014.webp",
+    imageText: "Mesedez ez nazazu",
+    solution: "Atzamarkatu",
     explanation: ""
   }
 ];
