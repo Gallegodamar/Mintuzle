@@ -132,6 +132,7 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
   }
 ];
 
+
 export const UI_STRINGS = {
   title: "Begiluze",
   menuSubtitle: "",

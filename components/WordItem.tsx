@@ -9,7 +9,7 @@ interface WordItemProps {
   onClick: () => void;
 }
 
-export const WordItem: React.FC<WordItemProps> = ({ 
+export const WordItem: React.FC<WordItemProps> = React.memo(({ 
   text, 
   actualStatus, 
   isRevealed, 
@@ -25,7 +25,7 @@ export const WordItem: React.FC<WordItemProps> = ({
         disabled={isRevealed}
         className={`
           relative flex flex-col md:flex-row items-center justify-between flex-grow p-5 
-          rounded-2xl border transition-all duration-300 transform active:scale-[0.98]
+          rounded-2xl border transition-all duration-300 transform active:scale-[0.95]
           ${!isRevealed 
             ? 'bg-white border-slate-200 text-slate-800 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-100' 
             : isCorrect 
@@ -70,4 +70,4 @@ export const WordItem: React.FC<WordItemProps> = ({
       )}
     </div>
   );
-};
+});
