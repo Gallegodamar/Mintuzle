@@ -7,13 +7,14 @@ import { AppView, GameMode, GameEntry, HieroglyphEntry, SynonymEntry, WordStatus
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('menu');
   const [mode, setMode] = useState<GameMode>('words');
-  const [level, setLevel] = useState<number>(1);
+  const [level, setLevel] = useState<number>(1); // Still used as session counter for 'words'
   const [revealedIndexes, setRevealedIndexes] = useState<Set<number>>(new Set());
   
   // Interaction specific state
   const [gameLevel, setGameLevel] = useState<number>(0);
   const [shuffledHieros, setShuffledHieros] = useState<HieroglyphEntry[]>([]);
   const [shuffledSynonyms, setShuffledSynonyms] = useState<SynonymEntry[]>([]);
+  const [sessionWords, setSessionWords] = useState<GameEntry[]>([]);
   const [timer, setTimer] = useState(40);
   const [showSolution, setShowSolution] = useState(false);
   const [userGuess, setUserGuess] = useState("");
@@ -73,12 +74,11 @@ const App: React.FC = () => {
     return null;
   }, [mode, gameLevel, shuffledHieros, shuffledSynonyms, dailyItems]);
 
-  // Track the specific correct synonym chosen for this instance
   const correctSynonymForRound = useMemo(() => {
     const activeMode = getActiveMode();
     if (activeMode !== 'synonyms' || !currentItem) return "";
     const synItem = currentItem as SynonymEntry;
-    return synItem.sinonimoak[0]; // Stable pick for the round
+    return synItem.sinonimoak[0];
   }, [currentItem, getActiveMode]);
 
   const synonymOptions = useMemo(() => {
@@ -91,21 +91,19 @@ const App: React.FC = () => {
     const allPossibleSyns = Array.from(new Set(SINONIMOAK.flatMap(s => s.sinonimoak)));
     const distractors = allPossibleSyns.filter(s => !correctOnes.includes(s));
     
-    // Pick 5 distractors randomly
     const pickedDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 5);
     const finalOptions = [correctSynonymForRound, ...pickedDistractors];
     return finalOptions.sort(() => 0.5 - Math.random());
   }, [getActiveMode, currentItem, correctSynonymForRound]);
 
-  // General list data for normal modes
   const currentListData = useMemo(() => {
     if (mode === 'words') {
-      return level === 1 ? GAME_WORDS_LVL1 : GAME_WORDS_LVL2;
+      return sessionWords;
     } else if (mode === 'proverbs') {
       return ATSOTITZAK;
     }
     return [];
-  }, [mode, level]);
+  }, [mode, sessionWords]);
 
   useEffect(() => {
     if (view === 'game') {
@@ -202,11 +200,23 @@ const App: React.FC = () => {
     setCorrectCount(0);
     setFailedCount(0);
     setRevealedIndexes(new Set());
-    if (gameMode === 'hieroglyphs') {
+    
+    if (gameMode === 'words') {
+      const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
+      setSessionWords(shuffleArray(allWords).slice(0, 6));
+    } else if (gameMode === 'hieroglyphs') {
       setShuffledHieros(shuffleArray(HIEROGLYPHS));
     } else if (gameMode === 'synonyms') {
       setShuffledSynonyms(shuffleArray(SINONIMOAK));
     }
+  }, [shuffleArray]);
+
+  const nextList = useCallback(() => {
+    setLevel(prev => prev + 1);
+    setRevealedIndexes(new Set());
+    const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
+    setSessionWords(shuffleArray(allWords).slice(0, 6));
+    window.scrollTo({top: 0, behavior: 'smooth'});
   }, [shuffleArray]);
 
   const resetGame = useCallback(() => {
@@ -388,7 +398,6 @@ const App: React.FC = () => {
                             <p className="text-3xl md:text-4xl font-black text-slate-900 game-title">{(currentItem as GameEntry).egoera === 'ondo dago' ? UI_STRINGS.ondo : UI_STRINGS.gaizki}</p>
                           ) : (
                             <div className="flex flex-wrap justify-center gap-2">
-                              {/* Only show the synonym that was actually used in the options for this round */}
                               <span className="bg-white border-2 border-green-200 px-4 md:px-6 py-2 md:py-3 rounded-xl text-lg md:text-xl font-bold text-green-700 shadow-sm animate-in zoom-in">
                                 {correctSynonymForRound}
                               </span>
@@ -462,14 +471,12 @@ const App: React.FC = () => {
                 <div className="mt-8 p-6 md:p-10 bg-blue-50 border border-blue-200 rounded-[2rem] md:rounded-[2.5rem] text-center shadow-inner">
                   <p className="text-xl md:text-2xl font-black text-blue-900 mb-6 game-title">Zerrenda osatuta!</p>
                   <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
-                    {mode === 'words' && level === 1 && (
-                      <button 
-                        onClick={() => {setLevel(2); setRevealedIndexes(new Set()); window.scrollTo({top: 0, behavior: 'smooth'});}} 
-                        className="px-8 py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg active:scale-95"
-                      >
-                        {UI_STRINGS.nextLevel}
-                      </button>
-                    )}
+                    <button 
+                      onClick={nextList} 
+                      className="px-8 py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg active:scale-95"
+                    >
+                      {UI_STRINGS.nextLevel}
+                    </button>
                     <button onClick={resetGame} className="px-8 py-3 md:py-4 bg-white border border-slate-300 text-slate-700 font-black rounded-xl active:scale-95">{UI_STRINGS.backMenu}</button>
                   </div>
                 </div>
