@@ -7,7 +7,7 @@ import { AppView, GameMode, GameEntry, HieroglyphEntry, SynonymEntry, WordStatus
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('menu');
   const [mode, setMode] = useState<GameMode>('words');
-  const [level, setLevel] = useState<number>(1); // Session counter
+  const [level, setLevel] = useState<number>(1); // Session/List counter
   const [revealedIndexes, setRevealedIndexes] = useState<Set<number>>(new Set());
   
   // Interaction specific state
@@ -62,21 +62,34 @@ const App: React.FC = () => {
     return newArr;
   }, []);
 
-  // Helper to get 6 items ensuring at least one is "gaizki dago"
+  /**
+   * Selects a subset of items ensuring:
+   * 1. Items are unique.
+   * 2. At least one item is marked as 'gaizki dago'.
+   */
   const getBalancedSubset = useCallback((fullList: GameEntry[], size: number) => {
-    let shuffled = shuffleArray(fullList);
-    let subset = shuffled.slice(0, size);
+    // 1. Initial shuffle of the entire pool
+    let shuffledPool = shuffleArray(fullList);
     
+    // 2. Take the first N items
+    let subset = shuffledPool.slice(0, size);
+    
+    // 3. Check if at least one is wrong
     const hasWrong = subset.some(item => item.egoera === 'gaizki dago');
+    
     if (!hasWrong) {
+      // Find all wrong ones in the full pool
       const wrongOnes = fullList.filter(item => item.egoera === 'gaizki dago');
       if (wrongOnes.length > 0) {
+        // Pick a random wrong one
         const randomWrong = wrongOnes[Math.floor(Math.random() * wrongOnes.length)];
+        // Replace a random item in the current subset
         const replaceIdx = Math.floor(Math.random() * size);
         subset[replaceIdx] = randomWrong;
       }
     }
-    // Final shuffle to ensure the "forced" wrong one isn't always at the same spot
+    
+    // 4. Final shuffle so the "forced" wrong one isn't predictable
     return shuffleArray(subset);
   }, [shuffleArray]);
 
