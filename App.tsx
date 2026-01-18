@@ -7,7 +7,7 @@ import { AppView, GameMode, GameEntry, HieroglyphEntry, SynonymEntry, WordStatus
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('menu');
   const [mode, setMode] = useState<GameMode>('words');
-  const [level, setLevel] = useState<number>(1); // Still used as session counter for 'words'
+  const [level, setLevel] = useState<number>(1); // Session counter
   const [revealedIndexes, setRevealedIndexes] = useState<Set<number>>(new Set());
   
   // Interaction specific state
@@ -62,6 +62,24 @@ const App: React.FC = () => {
     return newArr;
   }, []);
 
+  // Helper to get 6 items ensuring at least one is "gaizki dago"
+  const getBalancedSubset = useCallback((fullList: GameEntry[], size: number) => {
+    let shuffled = shuffleArray(fullList);
+    let subset = shuffled.slice(0, size);
+    
+    const hasWrong = subset.some(item => item.egoera === 'gaizki dago');
+    if (!hasWrong) {
+      const wrongOnes = fullList.filter(item => item.egoera === 'gaizki dago');
+      if (wrongOnes.length > 0) {
+        const randomWrong = wrongOnes[Math.floor(Math.random() * wrongOnes.length)];
+        const replaceIdx = Math.floor(Math.random() * size);
+        subset[replaceIdx] = randomWrong;
+      }
+    }
+    // Final shuffle to ensure the "forced" wrong one isn't always at the same spot
+    return shuffleArray(subset);
+  }, [shuffleArray]);
+
   const getActiveMode = useCallback(() => {
     if (mode !== 'daily') return mode;
     return dailyItems[gameLevel]?.type as GameMode;
@@ -97,10 +115,8 @@ const App: React.FC = () => {
   }, [getActiveMode, currentItem, correctSynonymForRound]);
 
   const currentListData = useMemo(() => {
-    if (mode === 'words') {
+    if (mode === 'words' || mode === 'proverbs') {
       return sessionWords;
-    } else if (mode === 'proverbs') {
-      return ATSOTITZAK;
     }
     return [];
   }, [mode, sessionWords]);
@@ -203,21 +219,27 @@ const App: React.FC = () => {
     
     if (gameMode === 'words') {
       const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
-      setSessionWords(shuffleArray(allWords).slice(0, 6));
+      setSessionWords(getBalancedSubset(allWords, 6));
+    } else if (gameMode === 'proverbs') {
+      setSessionWords(getBalancedSubset(ATSOTITZAK, 6));
     } else if (gameMode === 'hieroglyphs') {
       setShuffledHieros(shuffleArray(HIEROGLYPHS));
     } else if (gameMode === 'synonyms') {
       setShuffledSynonyms(shuffleArray(SINONIMOAK));
     }
-  }, [shuffleArray]);
+  }, [shuffleArray, getBalancedSubset]);
 
   const nextList = useCallback(() => {
     setLevel(prev => prev + 1);
     setRevealedIndexes(new Set());
-    const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
-    setSessionWords(shuffleArray(allWords).slice(0, 6));
+    if (mode === 'words') {
+      const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
+      setSessionWords(getBalancedSubset(allWords, 6));
+    } else if (mode === 'proverbs') {
+      setSessionWords(getBalancedSubset(ATSOTITZAK, 6));
+    }
     window.scrollTo({top: 0, behavior: 'smooth'});
-  }, [shuffleArray]);
+  }, [mode, getBalancedSubset]);
 
   const resetGame = useCallback(() => {
     setView('menu');
