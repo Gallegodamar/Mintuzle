@@ -6,6 +6,7 @@ interface WordItemProps {
   text: string;
   actualStatus: WordStatus;
   isRevealed: boolean;
+  showDictionary?: boolean;
   onClick: () => void;
 }
 
@@ -13,6 +14,7 @@ export const WordItem: React.FC<WordItemProps> = React.memo(({
   text, 
   actualStatus, 
   isRevealed, 
+  showDictionary = true,
   onClick 
 }) => {
   const isCorrect = actualStatus === 'ondo dago';
@@ -54,7 +56,7 @@ export const WordItem: React.FC<WordItemProps> = React.memo(({
         </div>
       </button>
 
-      {isRevealed && (
+      {isRevealed && showDictionary && (
         <a
           href={dictionaryUrl}
           target="_blank"

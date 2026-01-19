@@ -12,9 +12,7 @@ export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "Hozbera", egoera: "ondo dago" },
   { text: "Homoplatoa", egoera: "gaizki dago" },
   { text: "Harmaila", egoera: "ondo dago" },
-  { text: "Helizea", egoera: "ondo dago" },
-  { text: "Erramintak", egoera: "gaizki dago" }
-  
+  { text: "Helizea", egoera: "ondo dago" }
 ];
 
 export const GAME_WORDS_LVL2: GameEntry[] = [
@@ -28,7 +26,32 @@ export const GAME_WORDS_LVL2: GameEntry[] = [
   { text: "Zehar", egoera: "ondo dago" },
   { text: "Leihoa", egoera: "ondo dago" },
   { text: "Hibernatu", egoera: "ondo dago" },
-  { text: "Hestea", egoera: "ondo dago" }
+  { text: "Hestea", egoera: "ondo dago" },
+  { text: "antzeman", egoera: "ondo dago" },
+  { text: "izutu", egoera: "ondo dago" },
+  { text: "hikzi", egoera: "gaizki dago" },
+  { text: "ulergaitz", egoera: "ondo dago" },
+  { text: "zuspertu", egoera: "gaizki dago" },
+  { text: "igorri", egoera: "ondo dago" },
+  { text: "seken", egoera: "gaizki dago" },
+  { text: "jakiteko grina", egoera: "ondo dago" },
+  { text: "are gehiago", egoera: "ondo dago" },
+  { text: "leise", egoera: "gaizki dago" },
+  { text: "heremu", egoera: "gaizki dago" },
+  { text: "hondar", egoera: "ondo dago" },
+  { text: "gauzatu", egoera: "ondo dago" },
+  { text: "esanahia", egoera: "ondo dago" },
+  { text: "lapurtu", egoera: "ondo dago" },
+  { text: "ahaztu", egoera: "ondo dago" },
+  { text: "aditzera eman", egoera: "ondo dago" },
+  { text: "beztela", egoera: "gaizki dago" },
+  { text: "nagusitasun", egoera: "ondo dago" },
+  { text: "ukitua", egoera: "ondo dago" },
+  { text: "oinatz", egoera: "ondo dago" },
+  { text: "astarna", egoera: "gaizki dago" },
+  { text: "lohitu", egoera: "ondo dago" },
+  { text: "jazo", egoera: "ondo dago" },
+  { text: "izkanbila", egoera: "gaizki dago" },
 ];
 
 export const ATSOTITZAK: GameEntry[] = [
@@ -42,7 +65,34 @@ export const ATSOTITZAK: GameEntry[] = [
   { text: "Otsaileko euri, urteko ongarri", egoera: "ondo dago" },
   { text: "Ilargi berria, sorginen herria", egoera: "gaizki dago" },
   { text: "Otea loretsu, negua elurtsu", egoera: "ondo dago" },
-  { text: "Ekaina eder, uda halaber", egoera: "ondo dago" }
+  { text: "Ekaina eder, uda halaber", egoera: "ondo dago" },
+  { text: "Abere gaiztoa da gorrotoa.", egoera: "ondo dago" },
+  { text: "Ardo gozoak, lau begi eta oinik ez.", egoera: "ondo dago" },
+  { text: "Baleki gazteak, baleza zaharrak.", egoera: "ondo dago" },
+  { text: "Baleuka eta balitz, elkarren ondoan dabiltz.", egoera: "ondo dago" },
+  { text: "Dagoenean bon-bon, ez dagoenean egon.", egoera: "ondo dago" },
+  { text: "Ezinak ez du legerik.", egoera: "ondo dago" },
+  { text: "Gogoko tokian, aldaparik.", egoera: "gaizki dago" },
+  { text: "Hala ez baldin bada, halatsu.", egoera: "ondo dago" },
+  { text: "Haritz eroriari, orok egur.", egoera: "ondo dago" },
+  { text: "Hil eta lehen, salda bero.", egoera: "gaizki dago" },
+  { text: "Hori eta atariko haizea bat.", egoera: "ondo dago" },
+  { text: "Jakiteak ez du ogirik jaten.", egoera: "ondo dago" },
+  { text: "Kupel txarretik, ardo onik ez.", egoera: "ondo dago" },
+  { text: "Lehen hala, orain honela, gero ez jakin nola.", egoera: "ondo dago" },
+  { text: "Nori berea, Jaunaren legea, nori berea da gizalegea.", egoera: "ondo dago" },
+  { text: "Neke gaberik, ez da konturik.", egoera: "gaizki dago" },
+  { text: "Nori berea da zuzenbidea.", egoera: "ondo dago" },
+  { text: "Ogi gogorrari hagin zorrotza.", egoera: "ondo dago" },
+  { text: "Su gaberik ez da kerik.", egoera: "ondo dago" },
+  { text: "Ulertze onari, hitz aski.", egoera: "gaizki dago" },
+  { text: "Urak bide eginen du.", egoera: "ondo dago" },
+  { text: "Urrutiko intxaurrak hamalau, bertara joan eta lau.", egoera: "ondo dago" },
+  { text: "Ustea da jakitea.", egoera: "gaizki dago" },
+  { text: "Usteak erdia hutsa eta beste erdia putza.", egoera: "ondo dago" },
+  { text: "Zereko zera zertan dela zereko zerarekin.", egoera: "ondo dago" },
+  { text: "Zeurea egin artean mantso and mantso; zeurea eginez gero zantzo and zantzo.", egoera: "ondo dago" },
+  { text: "Zure izenean eta zure gizenean.", egoera: "gaizki dago" },
 ];
 
 export const SINONIMOAK: SynonymEntry[] = [
@@ -131,54 +181,6 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
     imageText: "Jolas gaitezen",
     solution: "Belarretan",
     explanation: ""
-  },
-  {
-    imageUrl: "ero_00007.webp",
-    imageText: "Santiago bidean ikusi nituen",
-    solution: "Bi pelegin",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00008.webp",
-    imageText: "Ihesi egiten harrapatu du",
-    solution: "Guardiak",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00009.webp",
-    imageText: "Gure herrian eraiki dute",
-    solution: "Ospitalea",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00010.webp",
-    imageText: "Izoztu da belardian",
-    solution: "Ihintza",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00011.webp",
-    imageText: "Oso gaziak daude",
-    solution: "Krispetak",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00012.webp",
-    imageText: "Hegan joan da",
-    solution: "Pelikanoa",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00013.webp",
-    imageText: "Zakarrontzira bota dugu",
-    solution: "Soberakina",
-    explanation: ""
-  },
-  {
-    imageUrl: "ero_00014.webp",
-    imageText: "Mesedez ez nazazu",
-    solution: "Atzamarkatu",
-    explanation: ""
   }
 ];
 
@@ -187,7 +189,7 @@ export const UI_STRINGS = {
   title: "Begiluze",
   menuSubtitle: "",
   wordsSubtitle: "Sakatu hitzak ondo ala gaizki idatzita dauden jakiteko.",
-  proverbsSubtitle: "Sakatu atsotitzak ondo ala gaizki idatzita dauden jakiteko.",
+  proverbsSubtitle: "Sakatu atsotitzak zuzenak ala okerrak diren jakiteko.",
   hieroglyphsSubtitle: "Asmatu eroglifikoaren esanahia.",
   synonymsSubtitle: "Idatzi emandako hitzaren sinonimo bat.",
   playAgain: "Berriro hasi",
@@ -218,8 +220,11 @@ export const UI_STRINGS = {
   wrongFeedback: "Ez da hori... Saiatu berriro!",
   targetWord: "Hitz hau dugu:",
   isCorrectQuestion: "Ondo idatzita dago?",
+  isProverbCorrectQuestion: "Atsotitz zuzena da?",
   ondo: "Ondo",
   gaizki: "Gaizki",
+  zuzena: "Zuzena",
+  okerra: "Okerra",
   dailyFinished: "Gaurko jokoa amaitu duzu! Bihar arte!",
   nextChallenge: "Hurrengo erronka"
 };

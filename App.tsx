@@ -22,6 +22,12 @@ const App: React.FC = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  
+  // Time tracking states
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [endTime, setEndTime] = useState<number | null>(null);
+  const [penaltyTime, setPenaltyTime] = useState<number>(0);
+
   const timerRef = useRef<number | null>(null);
 
   // Daily Mode Specific Items - Deterministic based on Date at 8:00 AM
@@ -43,13 +49,13 @@ const App: React.FC = () => {
     };
 
     const combinedWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
-    const wordIdx = getSeededIndex(seed + "word", combinedWords.length);
     
+    // STRICT ORDER: 1. words (zuzen idatzita), 2. proverbs (atsotitzak), 3. hieroglyphs (eroglifikoak), 4. synonyms (sinonimoak)
     return [
-      { type: 'words', data: combinedWords[wordIdx % combinedWords.length] },
-      { type: 'proverbs', data: ATSOTITZAK[getSeededIndex(seed + "prov", ATSOTITZAK.length)] },
-      { type: 'hieroglyphs', data: HIEROGLYPHS[getSeededIndex(seed + "hiero", HIEROGLYPHS.length)] },
-      { type: 'synonyms', data: SINONIMOAK[getSeededIndex(seed + "syn", SINONIMOAK.length)] }
+      { type: 'words' as GameMode, data: combinedWords[getSeededIndex(seed + "word", combinedWords.length) % combinedWords.length] },
+      { type: 'proverbs' as GameMode, data: ATSOTITZAK[getSeededIndex(seed + "prov", ATSOTITZAK.length)] },
+      { type: 'hieroglyphs' as GameMode, data: HIEROGLYPHS[getSeededIndex(seed + "hiero", HIEROGLYPHS.length)] },
+      { type: 'synonyms' as GameMode, data: SINONIMOAK[getSeededIndex(seed + "syn", SINONIMOAK.length)] }
     ];
   }, []);
 
@@ -62,34 +68,19 @@ const App: React.FC = () => {
     return newArr;
   }, []);
 
-  /**
-   * Selects a subset of items ensuring:
-   * 1. Items are unique.
-   * 2. At least one item is marked as 'gaizki dago'.
-   */
   const getBalancedSubset = useCallback((fullList: GameEntry[], size: number) => {
-    // 1. Initial shuffle of the entire pool
     let shuffledPool = shuffleArray(fullList);
-    
-    // 2. Take the first N items
     let subset = shuffledPool.slice(0, size);
-    
-    // 3. Check if at least one is wrong
     const hasWrong = subset.some(item => item.egoera === 'gaizki dago');
     
     if (!hasWrong) {
-      // Find all wrong ones in the full pool
       const wrongOnes = fullList.filter(item => item.egoera === 'gaizki dago');
       if (wrongOnes.length > 0) {
-        // Pick a random wrong one
         const randomWrong = wrongOnes[Math.floor(Math.random() * wrongOnes.length)];
-        // Replace a random item in the current subset
         const replaceIdx = Math.floor(Math.random() * size);
         subset[replaceIdx] = randomWrong;
       }
     }
-    
-    // 4. Final shuffle so the "forced" wrong one isn't predictable
     return shuffleArray(subset);
   }, [shuffleArray]);
 
@@ -122,7 +113,8 @@ const App: React.FC = () => {
     const allPossibleSyns = Array.from(new Set(SINONIMOAK.flatMap(s => s.sinonimoak)));
     const distractors = allPossibleSyns.filter(s => !correctOnes.includes(s));
     
-    const pickedDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 5);
+    // Per request: Limit to 4 options (1 correct + 3 distractors)
+    const pickedDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
     const finalOptions = [correctSynonymForRound, ...pickedDistractors];
     return finalOptions.sort(() => 0.5 - Math.random());
   }, [getActiveMode, currentItem, correctSynonymForRound]);
@@ -142,8 +134,12 @@ const App: React.FC = () => {
       setSelectedOption(null);
       
       const activeMode = getActiveMode();
-      if (activeMode === 'hieroglyphs') {
-        setTimer(40);
+      // Timer applies to Hieroglyphs always, and to Words, Proverbs, Synonyms ONLY in Daily Mode
+      const isDailyTimed = mode === 'daily' && (activeMode === 'words' || activeMode === 'proverbs' || activeMode === 'synonyms');
+      const needsTimer = activeMode === 'hieroglyphs' || isDailyTimed;
+
+      if (needsTimer) {
+        setTimer(activeMode === 'hieroglyphs' ? 40 : 10);
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = window.setInterval(() => {
           setTimer((prev) => {
@@ -151,6 +147,7 @@ const App: React.FC = () => {
               if (timerRef.current) clearInterval(timerRef.current);
               setFailedCount(f => f + 1);
               setShowSolution(true);
+              setGuessFeedback("wrong");
               return 0;
             }
             return prev - 1;
@@ -163,7 +160,11 @@ const App: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [view, getActiveMode, gameLevel]);
+  }, [view, getActiveMode, gameLevel, mode]);
+
+  const finishGame = useCallback(() => {
+    setEndTime(Date.now());
+  }, []);
 
   const nextChallenge = useCallback(() => {
     const total = mode === 'daily' ? 4 : (mode === 'hieroglyphs' ? shuffledHieros.length : shuffledSynonyms.length);
@@ -171,8 +172,9 @@ const App: React.FC = () => {
       setGameLevel(prev => prev + 1);
     } else {
        setGameLevel(total); 
+       finishGame();
     }
-  }, [mode, gameLevel, shuffledHieros.length, shuffledSynonyms.length]);
+  }, [mode, gameLevel, shuffledHieros.length, shuffledSynonyms.length, finishGame]);
 
   const handleGuessCheck = useCallback(() => {
     const activeMode = getActiveMode();
@@ -195,6 +197,8 @@ const App: React.FC = () => {
     setFailedCount(f => f + 1);
     setShowSolution(true);
     setGuessFeedback("wrong");
+    // Penalty for skipping Hieroglyph is 40 seconds (as per request: "se contara como 40 segundos")
+    setPenaltyTime(p => p + 40000);
     if (timerRef.current) clearInterval(timerRef.current);
   }, [showSolution]);
 
@@ -211,6 +215,7 @@ const App: React.FC = () => {
       setFailedCount(f => f + 1);
     }
     setShowSolution(true);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, [currentItem, showSolution]);
 
   const handleOptionSelect = useCallback((option: string) => {
@@ -227,6 +232,7 @@ const App: React.FC = () => {
       setFailedCount(prev => prev + 1);
     }
     setShowSolution(true);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, [currentItem, showSolution]);
 
   const startGame = useCallback((gameMode: GameMode) => {
@@ -237,6 +243,9 @@ const App: React.FC = () => {
     setCorrectCount(0);
     setFailedCount(0);
     setRevealedIndexes(new Set());
+    setStartTime(Date.now());
+    setEndTime(null);
+    setPenaltyTime(0);
     
     if (gameMode === 'words') {
       const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
@@ -273,7 +282,17 @@ const App: React.FC = () => {
     setUserGuess("");
     setGuessFeedback(null);
     setSelectedOption(null);
+    setStartTime(null);
+    setEndTime(null);
+    setPenaltyTime(0);
   }, []);
+
+  const calculateTotalTime = useMemo(() => {
+    if (!startTime || !endTime) return "0.00";
+    const actualDuration = endTime - startTime;
+    const total = (actualDuration + penaltyTime) / 1000;
+    return total.toFixed(2);
+  }, [startTime, endTime, penaltyTime]);
 
   const renderMenu = () => (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-slate-50 text-slate-900 overflow-hidden">
@@ -338,6 +357,18 @@ const App: React.FC = () => {
     const totalChallenges = mode === 'daily' ? 4 : (mode === 'hieroglyphs' ? shuffledHieros.length : shuffledSynonyms.length);
     const isFinished = (mode === 'daily' || mode === 'hieroglyphs' || mode === 'synonyms') && gameLevel >= totalChallenges;
 
+    const getModeLabel = (m: GameMode) => {
+      switch(m) {
+        case 'words': return UI_STRINGS.modeWords;
+        case 'proverbs': return UI_STRINGS.modeProverbs;
+        case 'hieroglyphs': return UI_STRINGS.modeHieroglyphs;
+        case 'synonyms': return UI_STRINGS.modeSynonyms;
+        default: return UI_STRINGS.modeDaily;
+      }
+    };
+
+    const showTimerInThisMode = activeMode === 'hieroglyphs' || (mode === 'daily' && (activeMode === 'words' || activeMode === 'proverbs' || activeMode === 'synonyms'));
+
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-2xl relative z-10">
@@ -350,27 +381,38 @@ const App: React.FC = () => {
               <span className="font-bold text-[10px] md:text-xs tracking-wider">{UI_STRINGS.backMenu}</span>
             </button>
             <h2 className="text-sm md:text-xl font-black text-slate-800 tracking-tight game-title text-right">
-              {mode === 'daily' ? UI_STRINGS.modeDaily : mode === 'words' ? UI_STRINGS.modeWords : mode === 'proverbs' ? UI_STRINGS.modeProverbs : mode === 'hieroglyphs' ? UI_STRINGS.modeHieroglyphs : UI_STRINGS.modeSynonyms}
+              {mode === 'daily' ? UI_STRINGS.modeDaily : getModeLabel(mode)}
             </h2>
           </div>
 
           {(mode === 'daily' || mode === 'hieroglyphs' || mode === 'synonyms') ? (
             <div className="flex flex-col items-center gap-4 md:gap-6">
               {!isFinished && (
-                <div className="w-full grid grid-cols-3 gap-2 md:gap-4">
-                  <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.correctCount}</p>
-                    <p className="text-lg md:text-xl font-bold text-green-600">{correctCount}</p>
+                <>
+                  {mode === 'daily' && (
+                    <div className="w-full mb-2 px-5 py-3 bg-blue-50 border-l-4 border-blue-600 rounded-r-2xl shadow-sm animate-in fade-in slide-in-from-top-2">
+                      <p className="text-[10px] md:text-xs font-black text-blue-800 uppercase tracking-[0.2em] flex justify-between items-center">
+                        <span>{gameLevel + 1} / 4</span>
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full">{getModeLabel(activeMode)}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="w-full grid grid-cols-3 gap-2 md:gap-4">
+                    <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
+                      <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.correctCount}</p>
+                      <p className="text-lg md:text-xl font-bold text-green-600">{correctCount}</p>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
+                      <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.wrongCount}</p>
+                      <p className="text-lg md:text-xl font-bold text-red-600">{failedCount}</p>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
+                      <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.remainingCount}</p>
+                      <p className="text-lg md:text-xl font-bold text-blue-600">{Math.max(0, totalChallenges - gameLevel)}</p>
+                    </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.wrongCount}</p>
-                    <p className="text-lg md:text-xl font-bold text-red-600">{failedCount}</p>
-                  </div>
-                  <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">{UI_STRINGS.remainingCount}</p>
-                    <p className="text-lg md:text-xl font-bold text-blue-600">{Math.max(0, totalChallenges - gameLevel)}</p>
-                  </div>
-                </div>
+                </>
               )}
 
               {currentItem && !isFinished && (
@@ -383,7 +425,9 @@ const App: React.FC = () => {
                       </div>
                     ) : (activeMode === 'words' || activeMode === 'proverbs') ? (
                       <div className="text-center px-4">
-                        <p className="text-[10px] md:text-xs font-black text-slate-400 tracking-[0.3em] mb-4 uppercase">{UI_STRINGS.isCorrectQuestion}</p>
+                        <p className="text-[10px] md:text-xs font-black text-slate-400 tracking-[0.3em] mb-4 uppercase">
+                          {activeMode === 'words' ? UI_STRINGS.isCorrectQuestion : UI_STRINGS.isProverbCorrectQuestion}
+                        </p>
                         <h3 className="text-2xl md:text-4xl font-black text-slate-800 game-title leading-tight">{(currentItem as GameEntry).text}</h3>
                       </div>
                     ) : (
@@ -395,9 +439,17 @@ const App: React.FC = () => {
                   </div>
                   
                   <div className="w-full bg-white border border-slate-200 p-5 md:p-10 rounded-3xl shadow-lg">
+                    {/* Timer display for timed modes (including Daily Game) */}
+                    {showTimerInThisMode && !showSolution && (
+                      <div className="flex flex-col items-center gap-4 md:gap-6 mb-6">
+                         <div className={`text-4xl md:text-5xl font-black tabular-nums transition-colors ${timer <= 3 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>
+                           {timer}
+                         </div>
+                      </div>
+                    )}
+
                     {activeMode === 'hieroglyphs' && !showSolution && (
                       <div className="flex flex-col items-center gap-4 md:gap-6">
-                         <div className={`text-4xl md:text-5xl font-black tabular-nums transition-colors ${timer <= 10 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>{timer}</div>
                          <div className="w-full">
                             <input 
                               type="text" 
@@ -418,8 +470,12 @@ const App: React.FC = () => {
 
                     {(activeMode === 'words' || activeMode === 'proverbs') && !showSolution && (
                       <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        <button onClick={() => handleSpellingChoice('ondo dago')} className="py-4 md:py-6 bg-green-600 text-white font-black rounded-2xl shadow-lg hover:bg-green-700 transition-all text-lg md:text-xl game-title active:scale-95">{UI_STRINGS.ondo}</button>
-                        <button onClick={() => handleSpellingChoice('gaizki dago')} className="py-4 md:py-6 bg-red-600 text-white font-black rounded-2xl shadow-lg hover:bg-red-700 transition-all text-lg md:text-xl game-title active:scale-95">{UI_STRINGS.gaizki}</button>
+                        <button onClick={() => handleSpellingChoice('ondo dago')} className="py-4 md:py-6 bg-green-600 text-white font-black rounded-2xl shadow-lg hover:bg-green-700 transition-all text-lg md:text-xl game-title active:scale-95">
+                          {activeMode === 'words' ? UI_STRINGS.ondo : UI_STRINGS.zuzena}
+                        </button>
+                        <button onClick={() => handleSpellingChoice('gaizki dago')} className="py-4 md:py-6 bg-red-600 text-white font-black rounded-2xl shadow-lg hover:bg-red-700 transition-all text-lg md:text-xl game-title active:scale-95">
+                          {activeMode === 'words' ? UI_STRINGS.gaizki : UI_STRINGS.okerra}
+                        </button>
                       </div>
                     )}
 
@@ -435,13 +491,18 @@ const App: React.FC = () => {
                       <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className={`w-full p-6 md:p-8 rounded-2xl text-center shadow-sm border-2 ${guessFeedback === 'correct' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                           <p className={`text-xs md:text-sm font-bold mb-4 uppercase tracking-wider ${guessFeedback === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
-                            {guessFeedback === 'correct' ? UI_STRINGS.correctFeedback : UI_STRINGS.wrongFeedback}
+                            {timer === 0 && guessFeedback === 'wrong' ? UI_STRINGS.timerExpired : (guessFeedback === 'correct' ? UI_STRINGS.correctFeedback : UI_STRINGS.wrongFeedback)}
                           </p>
                           <p className="text-[9px] md:text-[10px] font-black text-slate-400 mb-3 tracking-[0.2em] uppercase">{UI_STRINGS.hiddenSolution}</p>
                           {activeMode === 'hieroglyphs' ? (
                             <p className="text-3xl md:text-4xl font-black text-slate-900 game-title">{(currentItem as HieroglyphEntry).solution}</p>
                           ) : (activeMode === 'words' || activeMode === 'proverbs') ? (
-                            <p className="text-3xl md:text-4xl font-black text-slate-900 game-title">{(currentItem as GameEntry).egoera === 'ondo dago' ? UI_STRINGS.ondo : UI_STRINGS.gaizki}</p>
+                            <p className="text-3xl md:text-4xl font-black text-slate-900 game-title">
+                              {(currentItem as GameEntry).egoera === 'ondo dago' 
+                                ? (activeMode === 'words' ? UI_STRINGS.ondo : UI_STRINGS.zuzena) 
+                                : (activeMode === 'words' ? UI_STRINGS.gaizki : UI_STRINGS.okerra)
+                              }
+                            </p>
                           ) : (
                             <div className="flex flex-wrap justify-center gap-2">
                               <span className="bg-white border-2 border-green-200 px-4 md:px-6 py-2 md:py-3 rounded-xl text-lg md:text-xl font-bold text-green-700 shadow-sm animate-in zoom-in">
@@ -464,9 +525,9 @@ const App: React.FC = () => {
               )}
 
               {isFinished && (
-                <div className="w-full p-8 md:p-12 bg-white border border-slate-200 rounded-[2.5rem] md:rounded-[3rem] text-center shadow-2xl animate-in zoom-in duration-300">
+                <div className="w-full p-8 md:p-12 bg-white border border-slate-200 rounded-[2.5rem] md:rounded-[2.5rem] text-center shadow-2xl animate-in zoom-in duration-300">
                    <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-6 md:mb-8 game-title leading-tight">{mode === 'daily' ? UI_STRINGS.dailyFinished : "Jokoa amaitu da!"}</h2>
-                   <div className="grid grid-cols-2 gap-4 md:gap-8 mb-8 md:mb-12">
+                   <div className="grid grid-cols-2 gap-4 md:gap-8 mb-8">
                       <div className="p-4 md:p-6 bg-green-50 rounded-2xl md:rounded-3xl border-2 border-green-100">
                         <p className="text-[8px] md:text-xs font-black text-green-700 tracking-widest mb-1 md:mb-2 uppercase">Asmatuta</p>
                         <p className="text-3xl md:text-5xl font-black text-green-600">{correctCount}</p>
@@ -476,23 +537,33 @@ const App: React.FC = () => {
                         <p className="text-3xl md:text-5xl font-black text-red-600">{failedCount}</p>
                       </div>
                    </div>
+                   
+                   <div className="w-full mb-8 p-6 bg-blue-50 border-2 border-blue-100 rounded-2xl shadow-sm">
+                      <p className="text-[10px] md:text-xs font-black text-blue-800 uppercase tracking-[0.2em] mb-2">Denbora guztira</p>
+                      <p className="text-3xl md:text-4xl font-black text-blue-600 game-title">{calculateTotalTime} segundo</p>
+                   </div>
+
                    <button onClick={resetGame} className="w-full py-4 md:py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all game-title shadow-xl active:scale-95">{UI_STRINGS.backMenu}</button>
                 </div>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-2 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="w-full grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
+              <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
                 <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Zuzenak</p>
+                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Puntuazioa</p>
+                  <p className="text-lg md:text-xl font-bold text-slate-800">{correctCount} - {failedCount}</p>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
+                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Zuzenak falta</p>
                   <p className="text-lg md:text-xl font-bold text-green-600">{currentListData.filter(d => d.egoera === 'ondo dago').length - currentListData.filter((d, i) => revealedIndexes.has(i) && d.egoera === 'ondo dago').length}</p>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Okerrak</p>
+                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Okerrak falta</p>
                   <p className="text-lg md:text-xl font-bold text-red-600">{currentListData.filter(d => d.egoera === 'gaizki dago').length - currentListData.filter((d, i) => revealedIndexes.has(i) && d.egoera === 'gaizki dago').length}</p>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-xl p-2 md:p-3 text-center shadow-sm">
-                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Geratzen dira</p>
+                  <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest uppercase">Guztira falta</p>
                   <p className="text-lg md:text-xl font-bold text-blue-600">{currentListData.length - revealedIndexes.size}</p>
                 </div>
               </div>
@@ -503,10 +574,23 @@ const App: React.FC = () => {
                     text={item.text} 
                     actualStatus={item.egoera} 
                     isRevealed={revealedIndexes.has(idx)} 
+                    showDictionary={mode !== 'proverbs'}
                     onClick={() => {
+                      const itemToReveal = currentListData[idx];
+                      if (itemToReveal.egoera === 'ondo dago') {
+                        setCorrectCount(prev => prev + 1);
+                      } else {
+                        setFailedCount(prev => prev + 1);
+                      }
                       setRevealedIndexes(prev => {
                         const n = new Set(prev);
                         n.add(idx);
+                        
+                        // If all items revealed in Word/Proverb mode, finish time tracking
+                        if (n.size === currentListData.length) {
+                          finishGame();
+                        }
+                        
                         return n;
                       });
                     }} 
@@ -516,6 +600,12 @@ const App: React.FC = () => {
               {revealedIndexes.size === currentListData.length && (
                 <div className="mt-8 p-6 md:p-10 bg-blue-50 border border-blue-200 rounded-[2rem] md:rounded-[2.5rem] text-center shadow-inner">
                   <p className="text-xl md:text-2xl font-black text-blue-900 mb-6 game-title">Zerrenda osatuta!</p>
+                  
+                  <div className="w-full mb-8 p-6 bg-white border border-blue-100 rounded-2xl shadow-sm">
+                      <p className="text-[10px] md:text-xs font-black text-blue-800 uppercase tracking-[0.2em] mb-2">Denbora guztira</p>
+                      <p className="text-3xl md:text-4xl font-black text-blue-600 game-title">{calculateTotalTime} segundo</p>
+                  </div>
+
                   <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
                     <button 
                       onClick={nextList} 
