@@ -22,6 +22,8 @@ const App: React.FC = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [hasLost, setHasLost] = useState(false);
+  const [dailySeedOffset, setDailySeedOffset] = useState(0);
   
   // Time tracking states
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -30,14 +32,14 @@ const App: React.FC = () => {
 
   const timerRef = useRef<number | null>(null);
 
-  // Daily Mode Specific Items - Deterministic based on Date at 8:00 AM
+  // Daily Mode Specific Items - Deterministic based on Date at 8:00 AM + Refresh Offset
   const dailyItems = useMemo(() => {
     const now = new Date();
     const d = new Date(now);
     if (now.getHours() < 8) {
       d.setDate(d.getDate() - 1);
     }
-    const seed = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    const seed = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}-${dailySeedOffset}`;
     
     const getSeededIndex = (str: string, max: number) => {
       let hash = 0;
@@ -57,7 +59,7 @@ const App: React.FC = () => {
       { type: 'hieroglyphs' as GameMode, data: HIEROGLYPHS[getSeededIndex(seed + "hiero", HIEROGLYPHS.length)] },
       { type: 'synonyms' as GameMode, data: SINONIMOAK[getSeededIndex(seed + "syn", SINONIMOAK.length)] }
     ];
-  }, []);
+  }, [dailySeedOffset]);
 
   const shuffleArray = useCallback(<T,>(array: T[]): T[] => {
     const newArr = [...array];
@@ -246,6 +248,8 @@ const App: React.FC = () => {
     setStartTime(Date.now());
     setEndTime(null);
     setPenaltyTime(0);
+    setHasLost(false);
+    setDailySeedOffset(0);
     
     if (gameMode === 'words') {
       const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
@@ -259,9 +263,26 @@ const App: React.FC = () => {
     }
   }, [shuffleArray, getBalancedSubset]);
 
+  const refreshDailyQuestions = useCallback(() => {
+    setDailySeedOffset(prev => prev + 1);
+    setGameLevel(0);
+    setCorrectCount(0);
+    setFailedCount(0);
+    setPenaltyTime(0);
+    setStartTime(Date.now());
+    setEndTime(null);
+    setShowSolution(false);
+    setUserGuess("");
+    setGuessFeedback(null);
+    setSelectedOption(null);
+  }, []);
+
   const nextList = useCallback(() => {
     setLevel(prev => prev + 1);
     setRevealedIndexes(new Set());
+    setHasLost(false);
+    setStartTime(Date.now());
+    setEndTime(null);
     if (mode === 'words') {
       const allWords = [...GAME_WORDS_LVL1, ...GAME_WORDS_LVL2];
       setSessionWords(getBalancedSubset(allWords, 6));
@@ -285,6 +306,8 @@ const App: React.FC = () => {
     setStartTime(null);
     setEndTime(null);
     setPenaltyTime(0);
+    setHasLost(false);
+    setDailySeedOffset(0);
   }, []);
 
   const calculateTotalTime = useMemo(() => {
@@ -380,9 +403,21 @@ const App: React.FC = () => {
               <i className="fa-solid fa-arrow-left"></i>
               <span className="font-bold text-[10px] md:text-xs tracking-wider">{UI_STRINGS.backMenu}</span>
             </button>
-            <h2 className="text-sm md:text-xl font-black text-slate-800 tracking-tight game-title text-right">
-              {mode === 'daily' ? UI_STRINGS.modeDaily : getModeLabel(mode)}
-            </h2>
+            <div className="flex items-center gap-3">
+              {mode === 'daily' && !isFinished && (
+                <button
+                  onClick={refreshDailyQuestions}
+                  className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl active:scale-95"
+                  title={UI_STRINGS.refreshDaily}
+                >
+                  <i className="fa-solid fa-rotate"></i>
+                  <span className="font-bold text-[10px] md:text-xs">{UI_STRINGS.refreshDaily}</span>
+                </button>
+              )}
+              <h2 className="text-sm md:text-xl font-black text-slate-800 tracking-tight game-title text-right">
+                {mode === 'daily' ? UI_STRINGS.modeDaily : getModeLabel(mode)}
+              </h2>
+            </div>
           </div>
 
           {(mode === 'daily' || mode === 'hieroglyphs' || mode === 'synonyms') ? (
@@ -576,44 +611,80 @@ const App: React.FC = () => {
                     isRevealed={revealedIndexes.has(idx)} 
                     showDictionary={mode !== 'proverbs'}
                     onClick={() => {
+                      if (hasLost) return;
                       const itemToReveal = currentListData[idx];
-                      if (itemToReveal.egoera === 'ondo dago') {
-                        setCorrectCount(prev => prev + 1);
-                      } else {
-                        setFailedCount(prev => prev + 1);
-                      }
-                      setRevealedIndexes(prev => {
-                        const n = new Set(prev);
-                        n.add(idx);
-                        
-                        // If all items revealed in Word/Proverb mode, finish time tracking
-                        if (n.size === currentListData.length) {
+                      
+                      if (mode === 'words') {
+                        // Sudden death logic for spelling list
+                        if (itemToReveal.egoera === 'gaizki dago') {
+                          setHasLost(true);
+                          setFailedCount(prev => prev + 1);
+                          // Reveal all items on loss
+                          const allIdx = new Set(currentListData.map((_, i) => i));
+                          setRevealedIndexes(allIdx);
                           finishGame();
+                        } else {
+                          setCorrectCount(prev => prev + 1);
+                          setRevealedIndexes(prev => {
+                            const n = new Set(prev);
+                            n.add(idx);
+                            
+                            const totalCorrect = currentListData.filter(d => d.egoera === 'ondo dago').length;
+                            const foundCorrect = [...n].filter(i => currentListData[i].egoera === 'ondo dago').length;
+                            
+                            if (foundCorrect === totalCorrect) {
+                              // Win condition: found all correct ones
+                              // Also reveal the wrong ones to show we finished
+                              const allIdx = new Set(currentListData.map((_, i) => i));
+                              finishGame();
+                              return allIdx;
+                            }
+                            return n;
+                          });
                         }
-                        
-                        return n;
-                      });
+                      } else {
+                        // Regular logic for proverbs or other lists
+                        if (itemToReveal.egoera === 'ondo dago') {
+                          setCorrectCount(prev => prev + 1);
+                        } else {
+                          setFailedCount(prev => prev + 1);
+                        }
+                        setRevealedIndexes(prev => {
+                          const n = new Set(prev);
+                          n.add(idx);
+                          if (n.size === currentListData.length) {
+                            finishGame();
+                          }
+                          return n;
+                        });
+                      }
                     }} 
                   />
                 ))}
               </div>
               {revealedIndexes.size === currentListData.length && (
-                <div className="mt-8 p-6 md:p-10 bg-blue-50 border border-blue-200 rounded-[2rem] md:rounded-[2.5rem] text-center shadow-inner">
-                  <p className="text-xl md:text-2xl font-black text-blue-900 mb-6 game-title">Zerrenda osatuta!</p>
+                <div className={`mt-8 p-6 md:p-10 ${hasLost ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'} border rounded-[2rem] md:rounded-[2.5rem] text-center shadow-inner`}>
+                  <p className={`text-xl md:text-2xl font-black mb-6 game-title ${hasLost ? 'text-red-900' : 'text-blue-900'}`}>
+                    {hasLost ? UI_STRINGS.loseMessage : UI_STRINGS.winMessage}
+                  </p>
                   
-                  <div className="w-full mb-8 p-6 bg-white border border-blue-100 rounded-2xl shadow-sm">
-                      <p className="text-[10px] md:text-xs font-black text-blue-800 uppercase tracking-[0.2em] mb-2">Denbora guztira</p>
-                      <p className="text-3xl md:text-4xl font-black text-blue-600 game-title">{calculateTotalTime} segundo</p>
-                  </div>
+                  {!hasLost && (
+                    <div className="w-full mb-8 p-6 bg-white border border-blue-100 rounded-2xl shadow-sm">
+                        <p className="text-[10px] md:text-xs font-black text-blue-800 uppercase tracking-[0.2em] mb-2">Denbora guztira</p>
+                        <p className="text-3xl md:text-4xl font-black text-blue-600 game-title">{calculateTotalTime} segundo</p>
+                    </div>
+                  )}
 
                   <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
-                    <button 
-                      onClick={nextList} 
-                      className="px-8 py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg active:scale-95"
-                    >
-                      {UI_STRINGS.nextLevel}
-                    </button>
-                    <button onClick={resetGame} className="px-8 py-3 md:py-4 bg-white border border-slate-300 text-slate-700 font-black rounded-xl active:scale-95">{UI_STRINGS.backMenu}</button>
+                    {!hasLost && (
+                      <button 
+                        onClick={nextList} 
+                        className="px-8 py-3 md:py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg active:scale-95"
+                      >
+                        {UI_STRINGS.nextLevel}
+                      </button>
+                    )}
+                    <button onClick={resetGame} className={`px-8 py-3 md:py-4 bg-white border ${hasLost ? 'border-red-300 text-red-700' : 'border-slate-300 text-slate-700'} font-black rounded-xl active:scale-95`}>{UI_STRINGS.backMenu}</button>
                   </div>
                 </div>
               )}
