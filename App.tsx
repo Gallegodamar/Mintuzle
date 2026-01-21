@@ -112,11 +112,23 @@ const App: React.FC = () => {
     const synItem = currentItem as SynonymEntry;
     const correctOnes = synItem.sinonimoak;
     
-    const allPossibleSyns = Array.from(new Set(SINONIMOAK.flatMap(s => s.sinonimoak)));
-    const distractors = allPossibleSyns.filter(s => !correctOnes.includes(s));
+    // Categorized options logic
+    const targetType = synItem.mota;
+    const sameTypeEntries = SINONIMOAK.filter(s => s.mota === targetType && s.hitz !== synItem.hitz);
+    const distractorsPool = Array.from(new Set(sameTypeEntries.flatMap(s => s.sinonimoak)))
+      .filter(s => !correctOnes.includes(s));
     
-    // Per request: Limit to 4 options (1 correct + 3 distractors)
-    const pickedDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+    // Shuffle and pick 3 same-type distractors
+    let pickedDistractors = distractorsPool.sort(() => 0.5 - Math.random()).slice(0, 3);
+    
+    // Fallback: If not enough distractors of the same type, fill from the global pool
+    if (pickedDistractors.length < 3) {
+      const globalPool = Array.from(new Set(SINONIMOAK.flatMap(s => s.sinonimoak)))
+        .filter(s => !correctOnes.includes(s) && !pickedDistractors.includes(s));
+      const extraDistractors = globalPool.sort(() => 0.5 - Math.random()).slice(0, 3 - pickedDistractors.length);
+      pickedDistractors = [...pickedDistractors, ...extraDistractors];
+    }
+    
     const finalOptions = [correctSynonymForRound, ...pickedDistractors];
     return finalOptions.sort(() => 0.5 - Math.random());
   }, [getActiveMode, currentItem, correctSynonymForRound]);

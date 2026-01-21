@@ -16,6 +16,7 @@ export interface HieroglyphEntry {
 export interface SynonymEntry {
   hitz: string;
   sinonimoak: string[];
+  mota: 'aditza' | 'izena' | 'besteak';
 }
 
 export type GameMode = 'words' | 'proverbs' | 'hieroglyphs' | 'synonyms' | 'daily';
