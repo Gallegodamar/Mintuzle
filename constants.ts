@@ -185,7 +185,7 @@ export const HIEROGLYPHS: HieroglyphEntry[] = [
   {
     imageUrl: "ero_00007.webp",
     imageText: "Santiago bidean ikusi nituen",
-    solution: "Bi pelegin",
+    solution: "Bi pelegrin",
     explanation: ""
   },
   {
