@@ -20,7 +20,7 @@ export const GAME_WORDS_LVL2: GameEntry[] = [
   { text: "hauts", egoera: "ondo dago" },
   { text: "zihur", egoera: "gaizki dago" },
   { text: "hereserki", egoera: "gaizki dago" },
-  { text: "uhina", egoera: "ondo dago" },
+  { text: "uhin", egoera: "ondo dago" },
   { text: "hautsi", egoera: "ondo dago" },
   { text: "zehar", egoera: "ondo dago" },
   { text: "leiho", egoera: "ondo dago" },
