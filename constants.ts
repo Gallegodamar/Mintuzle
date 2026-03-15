@@ -4,7 +4,7 @@ import { GameEntry, HieroglyphEntry, SynonymEntry } from './types';
 export const GAME_WORDS_LVL1: GameEntry[] = [
   { text: "haizpe", egoera: "ondo dago" },
   { text: "halterofilia", egoera: "ondo dago" },
-  { text: "hieroglifikoa", egoera: "ondo dago" },
+  { text: "hieroglifiko", egoera: "ondo dago" },
   { text: "husadio", egoera: "gaizki dago" },
   { text: "hurko", egoera: "ondo dago" },
   { text: "harpa", egoera: "ondo dago" },
