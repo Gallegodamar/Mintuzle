@@ -576,11 +576,11 @@ const App: React.FC = () => {
                    <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-6 md:mb-8 game-title leading-tight">{mode === 'daily' ? UI_STRINGS.dailyFinished : "Jokoa amaitu da!"}</h2>
                    <div className="grid grid-cols-2 gap-4 md:gap-8 mb-8">
                       <div className="p-4 md:p-6 bg-green-50 rounded-2xl md:rounded-3xl border-2 border-green-100">
-                        <p className="text-[8px] md:text-xs font-black text-green-700 tracking-widest mb-1 md:mb-2 uppercase">Asmatuta</p>
+                        <p className="text-[8px] md:text-xs font-black text-green-700 tracking-widest mb-1 md:mb-2 uppercase">Asmatutakoak</p>
                         <p className="text-3xl md:text-5xl font-black text-green-600">{correctCount}</p>
                       </div>
                       <div className="p-4 md:p-6 bg-red-50 rounded-2xl md:rounded-3xl border-2 border-red-100">
-                        <p className="text-[8px] md:text-xs font-black text-red-700 tracking-widest mb-1 md:mb-2 uppercase">Huts egin da</p>
+                        <p className="text-[8px] md:text-xs font-black text-red-700 tracking-widest mb-1 md:mb-2 uppercase">Huts egindakoak</p>
                         <p className="text-3xl md:text-5xl font-black text-red-600">{failedCount}</p>
                       </div>
                    </div>
